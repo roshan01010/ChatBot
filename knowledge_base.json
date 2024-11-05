@@ -1,0 +1,40 @@
+{
+  "questions": [
+    {
+      "question": "Hi!",
+      "answer": "Hello!"
+    },
+    {
+      "question": "Your Name",
+      "answer": "I am Roshan"
+    },
+    {
+      "question": "Hi",
+      "answer": "Hi There!"
+    },
+    {
+      "question": "Your Name",
+      "answer": " I am  bot"
+    },
+    {
+      "question": "Your Name",
+      "answer": "Hi!"
+    },
+    {
+      "question": "How are You",
+      "answer": "I am Fine"
+    },
+    {
+      "question": "What is yor agr",
+      "answer": "30"
+    },
+    {
+      "question": "age?",
+      "answer": "30"
+    },
+    {
+      "question": "What is the purpose of you",
+      "answer": "I am here to Help you!"
+    }
+  ]
+}

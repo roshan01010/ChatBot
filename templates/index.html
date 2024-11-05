@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatBot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .chat-container {
+            width: 400px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .message-box {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .message {
+            margin: 5px 0;
+        }
+        .user-message {
+            text-align: right;
+            color: #007bff;
+        }
+        .bot-message {
+            text-align: left;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div id="message-box" class="message-box">
+            <!-- Messages will appear here -->
+        </div>
+        <form id="chat-form">
+            <input type="text" id="user_input" name="user_input" placeholder="Type your question..." required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('chat-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from refreshing the page
+
+            const userInput = document.getElementById('user_input').value;
+            const messageBox = document.getElementById('message-box');
+
+            // Display the user's message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = userInput;
+            messageBox.appendChild(userMessage);
+
+            // Clear the input field
+            document.getElementById('user_input').value = '';
+
+            // Send the user's message to the Flask backend
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'user_input': userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the bot's response
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot-message';
+                botMessage.textContent = data.response;
+                messageBox.appendChild(botMessage);
+
+                // Scroll to the bottom of the message box
+                messageBox.scrollTop = messageBox.scrollHeight;
+                
+                // If the bot needs to learn, show input fields for teaching
+                if (data.learn) {
+                    // Display a prompt for the user to provide an answer
+                    const teachMessage = document.createElement('div');
+                    teachMessage.className = 'message bot-message';
+                    teachMessage.innerHTML = `
+                        <form id="learn-form">
+                            <label>Teach me: <input type="text" id="new_answer" name="answer" placeholder="Your answer"></label>
+                            <button type="submit">Submit</button>
+                        </form>`;
+                    messageBox.appendChild(teachMessage);
+
+                    // Add event listener to handle learning
+                    document.getElementById('learn-form').addEventListener('submit', function(event) {
+                        event.preventDefault();
+
+                        const answer = document.getElementById('new_answer').value;
+                        fetch('/learn', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({ 'question': userInput, 'answer': answer })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Display learning confirmation message
+                            const confirmMessage = document.createElement('div');
+                            confirmMessage.className = 'message bot-message';
+                            confirmMessage.textContent = data.response;
+                            messageBox.appendChild(confirmMessage);
+                            
+                            // Clear the input fields after learning
+                            document.getElementById('new_answer').value = '';
+                            document.getElementById('learn-form').remove();
+                        });
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
